@@ -2,16 +2,19 @@ import 'package:ecommerceapp/models/main_category_model.dart';
 import 'package:ecommerceapp/models/product_model.dart';
 import 'package:ecommerceapp/models/sub_categories_model.dart';
 import 'package:ecommerceapp/services/product_service.dart';
+import 'package:ecommerceapp/utils/empty_validation.dart';
 import 'package:ecommerceapp/widgets/loader.dart';
+import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ProductScreen extends StatefulWidget {
 
+  var mainCtx;
   MainCategories categories;
   SubCategoriesModel subCategories;
 
-  ProductScreen(this.subCategories , this.categories);
+  ProductScreen(this.subCategories , this.categories , this.mainCtx);
 
   @override
   _ProductScreenState createState() => _ProductScreenState();
@@ -32,9 +35,17 @@ class _ProductScreenState extends State<ProductScreen> {
 
       productList = await ProductService.getProductList(widget.categories.name, widget.subCategories.name);
 
-      productList.forEach((element) {
-        quantityItemList.add(1);
-      });
+      if(productList!=null)
+        {
+          productList.forEach((element) {
+            quantityItemList.add(1);
+          });
+
+          print(productList[0].prod_code);
+
+        }
+
+
 
       isLoading = false;
       setState(() {
@@ -47,7 +58,9 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(),
+//      drawer: Drawer(
+//        child: DrawerElements.getDrawer("product_screen", context, widget.mainCtx),
+//      ),
       appBar: AppBar(
           iconTheme: new IconThemeData(color: Colors.black),
           elevation: 2,
@@ -134,8 +147,8 @@ class _ProductScreenState extends State<ProductScreen> {
               margin: EdgeInsets.only(left: 10 , right: 10 , top: 30),
               height: 100,
               width: 100,
-              child : Image.asset("images/gift_box.png"),
-//              child: Image.network((!EmptyValidation.isEmpty(productItem.prod_image)) ? productItem.prod_image : "")
+//              child : Image.asset("images/gift_box.png"),
+              child: Image.network((!EmptyValidation.isEmpty(productItem.prod_image)) ? productItem.prod_image : "")
           ),
              itemDetails(productItem , index)
         ],

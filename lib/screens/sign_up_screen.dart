@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class SignupScreen extends StatefulWidget {
+
+
   @override
   _SignupScreenState createState() => _SignupScreenState();
 }
@@ -180,8 +182,12 @@ class _SignupScreenState extends State<SignupScreen> {
                                        if(res!=null)
                                          {
                                            Fluttertoast.showToast(msg: "Successfully signed up !" , textColor: Colors.white , backgroundColor: Colors.black);
+                                           Navigator.pushReplacement(
+                                             context,
+                                             MaterialPageRoute(builder: (context) => LoginScreen()),
+                                           );
                                          }
-                                       print(res.toString());
+
 
                                        isLoading = false;
                                        setState(() {

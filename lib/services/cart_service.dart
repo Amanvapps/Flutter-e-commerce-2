@@ -25,6 +25,25 @@ class CartService
   }
 
 
+  static saveCart(String userId , String prodId , String quantity , String prodPrice) async
+  {
+    var response = await RequestHandler.GET(ApiConstants.ADD_CART , {
+      "user_sr" : userId,
+      "prod_id" : prodId,
+      "qty" : quantity,
+      "prod_price" : prodPrice,
+      "token" : TOKEN
+    });
+
+    if(response["status"]=="1" && response["data"]!=null)
+    {
+      return true;
+    }
+    else
+      return false;
+  }
+
+
 
 
 }

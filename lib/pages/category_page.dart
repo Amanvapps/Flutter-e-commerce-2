@@ -2,11 +2,18 @@ import 'package:ecommerceapp/models/main_category_model.dart';
 import 'package:ecommerceapp/screens/sub_category_screen.dart';
 import 'package:ecommerceapp/services/category_service.dart';
 import 'package:ecommerceapp/widgets/loader.dart';
+import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
 class CategoryPage extends StatefulWidget {
+
+  var mainCtx;
+  var username;
+
+  CategoryPage(this.mainCtx , this.username);
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -40,6 +47,7 @@ class _MainScreenState extends State<CategoryPage> {
 
     return Scaffold(
       drawer: Drawer(
+        child: DrawerElements.getDrawer("category_page", context, widget.mainCtx , widget.username),
       ),
       appBar: AppBar(
           iconTheme: new IconThemeData(color: Colors.black),
@@ -98,7 +106,7 @@ class _MainScreenState extends State<CategoryPage> {
       onTap: (){
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SubCategoryScreen(category)),
+          MaterialPageRoute(builder: (context) => SubCategoryScreen(category , widget.mainCtx)),
         );
       },
       child: Container(

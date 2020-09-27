@@ -6,6 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
+
+  var username;
+
+  MainScreen(this.username);
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -24,10 +29,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() => {
     (() async {
-      categoryPage = CategoryPage();
-      searchPage = SearchPage();
-      offerPage = OfferPage();
-      cartPage = CartPage();
+      categoryPage = CategoryPage(context , widget.username);
+      searchPage = SearchPage(context , widget.username);
+      offerPage = OfferPage(context , widget.username);
+      cartPage = CartPage(context , widget.username);
 
       pages = [categoryPage , searchPage , offerPage , cartPage];
       currentPage = categoryPage;

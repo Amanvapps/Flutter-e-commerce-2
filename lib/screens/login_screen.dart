@@ -5,6 +5,7 @@ import 'package:ecommerceapp/widgets/loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -90,9 +91,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                       bool res = await AuthService.login(phone, password);
                                       if(res == true)
                                         {
+                                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                                          String userName = prefs.getString('userName');
+
                                           Navigator.pushReplacement(
                                             context,
-                                            MaterialPageRoute(builder: (context) => MainScreen()),
+                                            MaterialPageRoute(builder: (context) => MainScreen(userName)),
                                           );
                                         }
                                       else
