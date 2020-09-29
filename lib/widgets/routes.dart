@@ -8,13 +8,12 @@ class Routes {
       title: Text("Profile"),
       leading: Icon(Icons.person),
       onTap: () {
-        if (pageName != ("settings")) {
+
           Navigator.of(context).pop();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ProfileScreen(mainCtx)),
           );
-        }
       },
     );
 

@@ -1,7 +1,7 @@
 import 'package:ecommerceapp/pages/cart_page.dart';
 import 'package:ecommerceapp/pages/category_page.dart';
 import 'package:ecommerceapp/pages/offer_page.dart';
-import 'package:ecommerceapp/pages/search_page.dart';
+import 'package:ecommerceapp/pages/wishlist_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +18,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   CategoryPage categoryPage;
-  SearchPage searchPage;
+  WishlistPage wishlistPage;
   OfferPage offerPage;
   CartPage cartPage;
 
@@ -30,11 +30,11 @@ class _MainScreenState extends State<MainScreen> {
   void initState() => {
     (() async {
       categoryPage = CategoryPage(context , widget.username);
-      searchPage = SearchPage(context , widget.username);
+      wishlistPage = WishlistPage(context , widget.username);
       offerPage = OfferPage(context , widget.username);
       cartPage = CartPage(context , widget.username);
 
-      pages = [categoryPage , searchPage , offerPage , cartPage];
+      pages = [categoryPage , wishlistPage , offerPage , cartPage];
       currentPage = categoryPage;
 
     })()
@@ -64,8 +64,8 @@ class _MainScreenState extends State<MainScreen> {
               title: Text('Home')
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            title:Text('Search'),
+            icon: Icon(Icons.favorite),
+            title:Text('Wishlist'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_offer),

@@ -107,11 +107,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
         margin: EdgeInsets.all(10),
         child: Column(
           children: [
-            Align(
-                alignment : Alignment.topRight,
-                child: Container(
-                    margin: const EdgeInsets.all(10),
-                    child: Icon(Icons.favorite_border))),
+            SizedBox(height: 10,),
             new Container(
               height: 100,
               margin: EdgeInsets.only(top : 10),

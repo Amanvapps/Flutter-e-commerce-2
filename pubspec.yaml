@@ -59,8 +59,6 @@ flutter:
   assets:
    - images/banner_image.jpg
    - images/profile_default.png
-   - images/women.png
-   - images/coffee.jpeg
    - images/gift_box.png
    - images/logo.jpg
 

@@ -59,6 +59,19 @@ class RequestHandler {
     return responseHandler(response);
   }
 
+  static Future DELETE_QUERY(url , [params]) async {
+    if (params != null) {
+      url += "?" + encodeQuery(params);
+    }
+
+    var response = await http.delete( Uri.parse(ApiConstants.URL + url),
+        headers: {
+          "Content-Type": "application/json",
+        });
+    return responseHandler(response);
+  }
+
+
   static responseHandler(response) {
     if (response.statusCode == 200) return json.decode(response.body);
     else {

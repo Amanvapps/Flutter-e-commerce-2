@@ -1,5 +1,6 @@
 class ProductModel
 {
+  String prod_id;
   String prod_name;
   String prod_code;
   String prod_desc;
@@ -12,8 +13,11 @@ class ProductModel
   String real_price;
   String manufacturer;
 
+
   ProductModel(obj)
   {
+
+    this.prod_id = obj["prod_sr"];
     this.prod_name = obj["prod_name"];
     this.prod_desc = obj["prod_desc"];
     this.prod_code = obj["prod_code"];

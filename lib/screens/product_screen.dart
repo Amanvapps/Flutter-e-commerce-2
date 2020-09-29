@@ -1,12 +1,16 @@
 import 'package:ecommerceapp/models/main_category_model.dart';
 import 'package:ecommerceapp/models/product_model.dart';
 import 'package:ecommerceapp/models/sub_categories_model.dart';
+import 'package:ecommerceapp/services/cart_service.dart';
 import 'package:ecommerceapp/services/product_service.dart';
+import 'package:ecommerceapp/services/wishlist_service.dart';
 import 'package:ecommerceapp/utils/empty_validation.dart';
 import 'package:ecommerceapp/widgets/loader.dart';
-import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductScreen extends StatefulWidget {
 
@@ -23,25 +27,36 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
 
 
-  List<ProductModel> productList = [];
+  List<ProductModel> productList = [] , wishList = [];
   List<int> quantityItemList = [];
   List<ProductModel> _searchResult = [];
   bool isLoading = true;
+  bool isAddingToCart = false;
+  List<String> wishlistProductIds = [];
   TextEditingController searchController = TextEditingController();
 
   @override
   void initState() => {
     (() async {
 
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String userId = prefs.getString('userId');
+
       productList = await ProductService.getProductList(widget.categories.name, widget.subCategories.name);
+      wishList = await WishlistService.getWishList(userId);
+
+      if(wishList!=null)
+        {
+          wishList.forEach((element) {
+            wishlistProductIds.add(element.prod_id);
+          });
+        }
 
       if(productList!=null)
         {
           productList.forEach((element) {
             quantityItemList.add(1);
           });
-
-          print(productList[0].prod_code);
 
         }
 
@@ -58,9 +73,6 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//      drawer: Drawer(
-//        child: DrawerElements.getDrawer("product_screen", context, widget.mainCtx),
-//      ),
       appBar: AppBar(
           iconTheme: new IconThemeData(color: Colors.black),
           elevation: 2,
@@ -78,23 +90,33 @@ class _ProductScreenState extends State<ProductScreen> {
       ),
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: (!isLoading) ? Column(
+        child: (!isLoading) ? Stack(
           children: [
-            Container(
-                margin: const EdgeInsets.only(left: 20 , right: 20 , top: 2),
-                child: searchField()),
-            (productList != null) ? (productList.length>0) ? Expanded(
-              child: Container(
-                margin: const EdgeInsets.all(20),
-                child:  _searchResult.length != 0 || searchController.text.isNotEmpty
-                    ? _buildSearchResults()
-                    : _buildResults(),
+            Column(
+              children: [
+                Container(
+                    margin: const EdgeInsets.only(left: 20 , right: 20 , top: 2),
+                    child: searchField()),
+                (productList != null) ? (productList.length>0) ? Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.all(20),
+                    child:  _searchResult.length != 0 || searchController.text.isNotEmpty
+                        ? _buildSearchResults()
+                        : _buildResults(),
+                  ),
+                ) : Container(
+                    height: 100,
+                    child: Center(child: Text('No Products Found !'))) : Container(
+                    height : 100,
+                    child: Center(child: Text('No Products Found !'),))
+              ],
+            ) ,
+            (!isAddingToCart) ? Container(): Center(
+              child: SpinKitCircle(
+                size: 125,
+                color: Colors.red,
               ),
-            ) : Container(
-                height: 100,
-                child: Center(child: Text('No Products Found !'))) : Container(
-                height : 100,
-                child: Center(child: Text('No Products Found !'),))
+            ),
           ],
         ) : Center(
           child: Loader.getListLoader(context),
@@ -164,10 +186,34 @@ class _ProductScreenState extends State<ProductScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-//            Align(
-//                alignment: Alignment.topRight,
-//                child: Icon(Icons.favorite , color: Colors.grey,)),
-//            SizedBox(height: 10,),
+            GestureDetector(
+              onTap: (){
+
+                if(wishlistProductIds.contains(productItem.prod_id))
+                 {
+                   wishlistProductIds.remove(productItem.prod_id);
+                   setState(() {
+                   });
+                   deleteWishlist(productItem.prod_id);
+                 }
+                else
+                  {
+                    wishlistProductIds.add(productItem.prod_id);
+                    setState(() {
+                    });
+                    addToWishlist(productItem.prod_id , productItem.sale_price ,quantityItemList[index].toString());
+                  print("no contain");
+
+
+                  }
+
+
+              },
+              child: Align(
+                  alignment: Alignment.topRight,
+                  child: Icon((wishlistProductIds.contains(productItem.prod_id.toString())) ? Icons.favorite : Icons.favorite_border , color: Colors.grey,)),
+            ),
+            SizedBox(height: 10,),
             Text(
               productItem.prod_name, style: TextStyle(fontSize: 17 , fontWeight: FontWeight.bold , color: Colors.black),),
             SizedBox(height: 6,),
@@ -211,7 +257,7 @@ class _ProductScreenState extends State<ProductScreen> {
 
   }
 
-  quantityButtons(cartItem , index)
+  quantityButtons(ProductModel cartItem , index)
   {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -261,14 +307,19 @@ class _ProductScreenState extends State<ProductScreen> {
         ),
         SizedBox(width: 30,),
         Expanded(
-          child: Container(
-            padding: EdgeInsets.all(5),
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(7),
-                border: Border.all(color: Colors.red)
+          child: GestureDetector(
+            onTap: (){
+              saveToCart(cartItem.prod_id , cartItem.prod_code , quantityItemList[index].toString() , cartItem.sale_price);
+            },
+            child: Container(
+              padding: EdgeInsets.all(5),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(7),
+                  border: Border.all(color: Colors.red)
+              ),
+              child: FittedBox(child: Text('Add To Cart' , style: TextStyle(fontSize : 13 , color: Colors.red),)),
             ),
-            child: FittedBox(child: Text('Add To Cart' , style: TextStyle(fontSize : 13 , color: Colors.red),)),
           ),
         )
       ],
@@ -327,6 +378,120 @@ class _ProductScreenState extends State<ProductScreen> {
 
     setState(() {});
   }
+
+  saveToCart(String prod_id , String prod_code, String quantity, String sale_price)  async
+  {
+    isAddingToCart = true;
+    setState(() {
+    });
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId');
+
+    if(!EmptyValidation.isEmpty(userId))
+      {
+
+        bool res = await CartService.saveCart(userId, prod_id, quantity, sale_price);
+
+        if(res==true)
+          Fluttertoast.showToast(msg: "Added To Cart" , backgroundColor: Colors.black , textColor: Colors.white);
+
+
+      }
+
+    isAddingToCart = false;
+    setState(() {
+    });
+
+  }
+
+   addToWishlist(String prod_id, String sale_price, String quantity) async
+   {
+
+
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+     String userId = prefs.getString('userId');
+
+     if(!EmptyValidation.isEmpty(userId))
+     {
+
+       bool res = await WishlistService.add(userId, prod_id, quantity, sale_price);
+
+       if(res==true)
+         {
+           Fluttertoast.showToast(msg: "Added To Wishlist" , backgroundColor: Colors.black , textColor: Colors.white);
+
+          try
+              {
+                if(wishList.length>0)
+                wishList.clear();
+
+                if(productList.length>0)
+                wishlistProductIds.clear();
+
+                wishList = await WishlistService.getWishList(userId);
+
+
+
+                if(wishList!=null)
+                {
+                  wishList.forEach((element) {
+                    wishlistProductIds.add(element.prod_id);
+                  });
+                }
+              }
+              catch(e) {}
+
+         }
+
+
+     }
+
+     setState(() {
+     });
+
+   }
+
+   deleteWishlist(String prod_id) async
+   {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+     String userId = prefs.getString('userId');
+
+     bool res = await WishlistService.deleteWishlist(userId, prod_id);
+
+     if(res == true)
+       {
+        Fluttertoast.showToast(msg: "Item Removed" , backgroundColor: Colors.black , textColor: Colors.white);
+
+       }
+     else
+       {
+         Fluttertoast.showToast(msg: "Error!" , backgroundColor: Colors.black , textColor: Colors.white);
+
+         try
+         {
+           if(wishList.length>0)
+             wishList.clear();
+
+           if(productList.length>0)
+             wishlistProductIds.clear();
+
+           wishList = await WishlistService.getWishList(userId);
+
+
+
+           if(wishList!=null)
+           {
+             wishList.forEach((element) {
+               wishlistProductIds.add(element.prod_id);
+             });
+           }
+         }
+         catch(e) {}
+
+       }
+
+   }
 
 
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ecommerceapp/models/cart_model.dart';
 import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ecommerceapp/services/auth_service.dart';
@@ -27,6 +28,7 @@ class _CartPageState extends State<CartPage> {
 
   List<CartModel> cartList = [];
   bool isLoading = true;
+  bool isDeletingCart = false;
   double deliveryCharge = 0.0 , taxAmount = 0.0 , cartTotal = 0.0 , totalAmount=0.0 ;
 
 
@@ -39,74 +41,101 @@ class _CartPageState extends State<CartPage> {
   void initState() => {
     (() async {
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String userId = prefs.getString('userId');
-      if(!EmptyValidation.isEmpty(userId))
-      {
-        cartList = await CartService.getCartList(userId);
+     await getCart();
 
-        if(cartList != null)
-          {
-            for(CartModel item in cartList)
-            {
-              quantityItemList.add(int.parse(item.quantity));
-            }
-
-            cartList.forEach((element) {
-              cartTotal = cartTotal + (int.parse(element.quantity) * int.parse(element.prod_price));
-            });
-
-
-            taxAmount = (2/100) * cartTotal;
-            totalAmount = cartTotal + taxAmount + deliveryCharge;
-
-
-            _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-            _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-            _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-
-
-          }
+        _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+        _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+        _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
 
 
         isLoading = false;
         setState(() {
         });
 
-      }
-      else
-        {
-          AuthService.logout(context);
-        }
 
     })()
 
   };
 
 
+getCart() async
+{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String userId = prefs.getString('userId');
+  if(!EmptyValidation.isEmpty(userId))
+  {
+
+
+    deliveryCharge=0.0;
+    taxAmount = 0.0;
+    cartTotal = 0.0;
+    totalAmount = 0.0;
+
+    if(quantityItemList.length>0)
+      quantityItemList.clear();
+
+    if(cartList.length>0)
+      cartList.clear();
+
+
+    cartList = await CartService.getCartList(userId);
+
+    if(cartList != null)
+    {
+
+      for(CartModel item in cartList)
+      {
+        quantityItemList.add(int.parse(item.quantity));
+      }
+
+      cartList.forEach((element) {
+        cartTotal = cartTotal + (int.parse(element.quantity) * int.parse(element.prod_price));
+      });
+
+
+      taxAmount = (2/100) * cartTotal;
+      totalAmount = cartTotal + taxAmount + deliveryCharge;
+
+
+
+    }
+
+    isLoading = false;
+    setState(() {
+    });
+  }
+  else
+  {
+    AuthService.logout(context);
+  }
+
+
+}
+
+
   void checkout()
   {
-    var options = {
-      'key': 'rzp_test_KM39B5YUIlg8Iw',
-      'amount': 11 * 100,
-      'name': 'Acme Corp.',
-      'description': 'Fine T-Shirt',
-      'prefill': {
-        'contact': '918171508475',
-        'email': 'amanapp19@gmail.com'
-      },
-      "external" : {
-        "wallets" :  ["paytm"]
-      }
-    };
-
-
-    try{
-      _razorpay.open(options);
-    } catch(e)
-    {}
-
-
+//    var options = {
+//      'key': 'rzp_test_KM39B5YUIlg8Iw',
+//      'amount': 11 * 100,
+//      'name': 'Acme Corp.',
+//      'description': 'Fine T-Shirt',
+//      'prefill': {
+//        'contact': '918171508475',
+//        'email': 'amanapp19@gmail.com'
+//      },
+//      "external" : {
+//        "wallets" :  ["paytm"]
+//      }
+//    };
+//
+//
+//    try{
+//      _razorpay.open(options);
+//    } catch(e)
+//    {}
+//
+//
 
   }
 
@@ -151,21 +180,31 @@ class _CartPageState extends State<CartPage> {
               ),)
           ]
       ),
-      body: (!isLoading) ? (cartList!=null) ? ListView(
+      body: (!isLoading) ? (cartList!=null) ? Stack(
         children: [
-          ListView.builder(
-              itemCount: cartList.length,
-              shrinkWrap: true,
-              physics: ClampingScrollPhysics(),
-              itemBuilder: (BuildContext context , int index)
-          {
-            return itemCard(cartList[index] , index);
-          }
+          ListView(
+            children: [
+              ListView.builder(
+                  itemCount: cartList.length,
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  itemBuilder: (BuildContext context , int index)
+              {
+                return itemCard(cartList[index] , index);
+              }
+              ),
+//              _buildTotalContainer()
+            ],
           ),
-          _buildTotalContainer()
+          (!isDeletingCart) ? Container(): Center(
+            child: SpinKitCircle(
+              size: 125,
+              color: Colors.red,
+            ),
+          ),
         ],
       ) : Center(
-        child: Text('No items added to cart' , style: TextStyle(fontSize: 20),),
+        child: Text('Empty Cart :(' , style: TextStyle(fontSize: 20 , fontWeight: FontWeight.bold),),
       ) : Loader.getLoader(),
     );
   }
@@ -208,24 +247,38 @@ class _CartPageState extends State<CartPage> {
                 alignment: Alignment.topRight,
                 child: GestureDetector(
                     onTap: () async {
+
+
+
                       var result = await deleteDialog();
 
-                      if(result ==  "true")
-                        {
-                          cartList.removeAt(index);
-                          quantityItemList.removeAt(index);
-
-                          cartTotal = 0.0;
-                          for(int i=0 ; i<cartList.length ; i++){
-                            cartTotal = cartTotal + (quantityItemList[i] * double.parse(cartList[i].prod_price));
-                          };
-                          taxAmount = (2/100)*cartTotal;
-                          totalAmount = cartTotal + taxAmount + deliveryCharge;
+                      isDeletingCart = true;
+                      setState(() {
+                      });
 
 
-                          setState(() {
-                          });
+                      if(result ==  "true") {
+
+                        var res = await deleteCart(cartItem);
+
+                        if (res == true) {
+                          isLoading = true;
+                          setState(() {});
+
+                          await getCart();
+                          Fluttertoast.showToast(msg: "Deleted");
                         }
+                        else {
+                          Fluttertoast.showToast(msg: "Delete Failed!");
+                        }
+
+
+                      }
+
+                      isDeletingCart = false;
+                      setState(() {});
+
+
                     },
                     child: Icon(Icons.delete))),
             SizedBox(height: 1,),
@@ -248,8 +301,8 @@ class _CartPageState extends State<CartPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           GestureDetector(
-            onTap: (){
-              if(quantityItemList[index] > 0)
+            onTap: () async {
+              if(quantityItemList[index] > 1)
                 {
                   quantityItemList[index]--;
 
@@ -263,6 +316,56 @@ class _CartPageState extends State<CartPage> {
 
                   setState(() {
                   });
+                }
+              else if(quantityItemList[index] == 1)
+                {
+
+
+                  // if 0 then delete from cart
+
+                  var result = await deleteDialog();
+
+                  isDeletingCart = true;
+                  setState(() {
+                  });
+
+
+                  if(result ==  "true") {
+
+                    var res = await deleteCart(cartItem);
+
+                    if (res == true) {
+                      isLoading = true;
+                      setState(() {});
+
+                      await getCart();
+                      Fluttertoast.showToast(msg: "Deleted");
+                    }
+                    else {
+                      Fluttertoast.showToast(msg: "Delete Failed!");
+                    }
+
+
+                  }
+                  else
+                    {
+                      quantityItemList[index] = 1;
+
+                      cartTotal = 0.0;
+                      for(int i=0 ; i<cartList.length ; i++){
+                        cartTotal = cartTotal + (quantityItemList[i] * double.parse(cartList[i].prod_price));
+                      };
+                      taxAmount = (2/100)*cartTotal;
+                      totalAmount = cartTotal + taxAmount + deliveryCharge;
+
+
+                      setState(() {
+                      });
+                    }
+
+                  isDeletingCart = false;
+                  setState(() {});
+
                 }
             },
             child: Container(
@@ -398,6 +501,15 @@ class _CartPageState extends State<CartPage> {
       ),
 
     );
+  }
+
+  Future<bool> deleteCart(CartModel cartItem) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String userId = prefs.getString('userId');
+
+    bool res = await CartService.deleteCart(userId, cartItem.prod_id);
+print(res.toString());
+    return res;
   }
 
 }

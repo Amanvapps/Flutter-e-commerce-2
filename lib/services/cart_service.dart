@@ -35,7 +35,7 @@ class CartService
       "token" : TOKEN
     });
 
-    if(response["status"]=="1" && response["data"]!=null)
+    if(response["status"]=="1")
     {
       return true;
     }
@@ -43,6 +43,22 @@ class CartService
       return false;
   }
 
+
+  static deleteCart(String userId , String prodId) async
+  {
+    var response = await RequestHandler.DELETE_QUERY(ApiConstants.DELETE_CART , {
+      "user_id" : userId,
+      "prod_id" : prodId,
+      "token" : TOKEN
+    });
+
+    if(response["status"]=="1")
+    {
+      return true;
+    }
+    else
+      return false;
+  }
 
 
 
