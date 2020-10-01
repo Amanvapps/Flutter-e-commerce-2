@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:ecommerceapp/models/cart_model.dart';
+import 'package:ecommerceapp/models/product_model.dart';
+import 'package:ecommerceapp/screens/updated_cart_screen.dart';
+import 'package:ecommerceapp/services/payment_service.dart';
 import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -32,7 +35,6 @@ class _CartPageState extends State<CartPage> {
   double deliveryCharge = 0.0 , taxAmount = 0.0 , cartTotal = 0.0 , totalAmount=0.0 ;
 
 
-  Razorpay _razorpay = Razorpay();
 
 
   List<int> quantityItemList = [];
@@ -42,11 +44,6 @@ class _CartPageState extends State<CartPage> {
     (() async {
 
      await getCart();
-
-        _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-        _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-        _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-
 
         isLoading = false;
         setState(() {
@@ -112,51 +109,6 @@ getCart() async
 
 }
 
-
-  void checkout()
-  {
-//    var options = {
-//      'key': 'rzp_test_KM39B5YUIlg8Iw',
-//      'amount': 11 * 100,
-//      'name': 'Acme Corp.',
-//      'description': 'Fine T-Shirt',
-//      'prefill': {
-//        'contact': '918171508475',
-//        'email': 'amanapp19@gmail.com'
-//      },
-//      "external" : {
-//        "wallets" :  ["paytm"]
-//      }
-//    };
-//
-//
-//    try{
-//      _razorpay.open(options);
-//    } catch(e)
-//    {}
-//
-//
-
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _razorpay.clear();
-  }
-
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    Fluttertoast.showToast(msg: "Payment Successfull" , backgroundColor: Colors.black , textColor: Colors.white);
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    Fluttertoast.showToast(msg: "Payment error :" + response.message , backgroundColor: Colors.black , textColor: Colors.white);
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-  }
-
   @override
   Widget build(BuildContext context) {
 
@@ -194,6 +146,7 @@ getCart() async
               }
               ),
 //              _buildTotalContainer()
+            _selectPaymentType()
             ],
           ),
           (!isDeletingCart) ? Container(): Center(
@@ -436,72 +389,6 @@ getCart() async
   }
 
 
-  Widget _buildTotalContainer()
-  {
-    return Container(
-      height: 240.0,
-      padding: EdgeInsets.symmetric(horizontal: 20.0),
-      margin: EdgeInsets.only(left : 20.0 , right: 20 , top: 50),
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Cart Total' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
-              Text(cartTotal.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
-            ],
-          ),
-          SizedBox(height: 10.0,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Transaction Tax' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
-              Text(taxAmount.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
-            ],
-          ),
-          SizedBox(height: 10.0,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Delivery Charge' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
-              Text( deliveryCharge.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
-            ],
-          ),
-          Divider(height: 40.0 , color: Color(0xFFD3D3D3),),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Sub Total' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
-              Text(totalAmount.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
-            ],
-          ),
-          SizedBox(height: 20.0),
-          GestureDetector(
-            onTap: (){
-              checkout();
-            },
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: 50.0,
-              decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(30.0)
-              ),
-              child: Center(
-                child: Text('Proceed to Checkout',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0
-                  ),),
-              ),
-            ),
-          )
-        ],
-      ),
-
-    );
-  }
 
   Future<bool> deleteCart(CartModel cartItem) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -511,5 +398,185 @@ getCart() async
 print(res.toString());
     return res;
   }
+
+  _selectPaymentType()
+  {
+    return  Container(
+      margin: EdgeInsets.only(left : 10.0 , right: 10),
+      child: Column(
+        children: [
+          GestureDetector(
+            onTap: () async {
+              var res = await showDeleteCashItemsAlert();
+
+              if(res == "true")
+              {
+                isDeletingCart = true;
+                setState(() {
+                });
+
+              updateCart();
+
+              }
+
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              margin: EdgeInsets.only(left : 20.0 , right: 20 , top: 50),
+              height: 50.0,
+              decoration: BoxDecoration(
+                  border: Border.all(color : Colors.blue),
+                  borderRadius: BorderRadius.circular(30.0)
+              ),
+              child: Center(
+                child: Text('Cash On Delivery',
+                  style: TextStyle(
+                      color: Colors.blueAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0
+                  ),),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () async {
+
+
+              isDeletingCart = true;
+              setState(() {
+              });
+
+              //save all objects to cart(update cart api....)
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UpdatedCartScreen("online")),
+              );
+
+              isDeletingCart = false;
+              setState(() {
+              });
+
+
+
+            },
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              margin: EdgeInsets.only(left : 20.0 , right: 20 , top: 20),
+              height: 50.0,
+              decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(30.0)
+              ),
+              child: Center(
+                child: Text('Pay Online',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0
+                  ),),
+              ),
+            ),
+          ),
+
+        ],
+      ),
+    );
+  }
+
+  showDeleteCashItemsAlert() async
+  {
+      return showDialog(
+          context: context,
+          builder: (_) {
+            return AlertDialog(
+              title: Text('Some items don\'t support cash on delivery, do you want to remove those items from cart?' , style: TextStyle(color: Colors.black),),
+              actions: [
+                FlatButton(
+                  onPressed: () => Navigator.pop(context, "false"), // passing false
+                  child: Text('Cancel'),
+                ),
+                FlatButton(
+                  onPressed: () => Navigator.pop(context, "true"), // passing true
+                  child: Text('Proceed'),
+                ),
+              ],
+            );
+          });
+  }
+
+   updateCart() async
+   {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+     String userId = prefs.getString('userId');
+     if(!EmptyValidation.isEmpty(userId))
+     {
+       Fluttertoast.showToast(msg: "Loading for payment..." , textColor: Colors.white , backgroundColor: Colors.black);
+
+       List updatedCartList = [];
+
+       for(int i=0 ; i<cartList.length ; i++) {
+
+
+
+         var product = {
+           "user_id" : userId.toString(),
+           "prod_sr" : cartList[i].prod_id.toString(),
+           "qty" : quantityItemList[i].toString(),
+           "sale_price" : cartList[i].prod_price.toString(),
+         };
+
+
+
+         updatedCartList.add(product);
+       }
+
+//
+//       print("--list--${updatedCartList.toString()}");
+
+
+       bool res = await CartService.updateCart(userId, json.encode(updatedCartList));
+
+       if(res == true)
+         {
+//          deleteCash(userId );
+
+         }
+       else
+         {
+           isDeletingCart = false;
+           setState(() {
+           });
+           Fluttertoast.showToast(msg: "Error occurred !" , textColor: Colors.white , backgroundColor: Colors.black);
+         }
+
+
+
+     }
+     else
+       AuthService.logout(context);
+   }
+
+   deleteCash(String userId) async
+   {
+     bool response = await PaymentService.deleteCash(userId);
+     if(response == true)
+     {
+       Fluttertoast.showToast(msg: "Cart updated!" , textColor: Colors.white , backgroundColor: Colors.black);
+       Navigator.push(
+         context,
+         MaterialPageRoute(builder: (context) => UpdatedCartScreen("cod")),
+       );
+     }
+     else
+       {
+         isDeletingCart = false;
+         setState(() {
+         });
+         Fluttertoast.showToast(msg: "Error occurred !" , textColor: Colors.white , backgroundColor: Colors.black);
+       }
+   }
 
 }

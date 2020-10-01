@@ -60,6 +60,23 @@ class CartService
       return false;
   }
 
+  static updateCart(String userId , data) async
+  {
+    var response = await RequestHandler.GET(ApiConstants.UPDATE_CART , {
+      "user_id" : userId,
+      "data" : data,
+      "token" : TOKEN
+    });
+
+    print('update cart response----${response.toString()}');
+
+    if(response["status"]=="1")
+    {
+      return true;
+    }
+    else
+      return false;
+  }
 
 
 }

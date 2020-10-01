@@ -14,7 +14,10 @@ class ProductModel
   String manufacturer;
 
 
-  ProductModel(obj)
+
+
+
+  ProductModel([obj])
   {
 
     this.prod_id = obj["prod_sr"];

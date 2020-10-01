@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class OfferPage extends StatefulWidget {
+class TransactionHistoryPage extends StatefulWidget {
 
 
   var mainCtx;
   var username;
 
-  OfferPage(this.mainCtx , this.username);
+  TransactionHistoryPage(this.mainCtx , this.username);
 
   @override
-  _OfferPageState createState() => _OfferPageState();
+  _TransactionHistoryPageState createState() => _TransactionHistoryPageState();
 }
 
-class _OfferPageState extends State<OfferPage> {
+class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Container();

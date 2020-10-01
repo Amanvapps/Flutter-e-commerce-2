@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
 
   CategoryPage categoryPage;
   WishlistPage wishlistPage;
-  OfferPage offerPage;
+  TransactionHistoryPage transactionHistoryPage;
   CartPage cartPage;
 
   int currentTabIndex = 0;
@@ -31,10 +31,10 @@ class _MainScreenState extends State<MainScreen> {
     (() async {
       categoryPage = CategoryPage(context , widget.username);
       wishlistPage = WishlistPage(context , widget.username);
-      offerPage = OfferPage(context , widget.username);
+      transactionHistoryPage = TransactionHistoryPage(context , widget.username);
       cartPage = CartPage(context , widget.username);
 
-      pages = [categoryPage , wishlistPage , offerPage , cartPage];
+      pages = [categoryPage , wishlistPage , cartPage  , transactionHistoryPage];
       currentPage = categoryPage;
 
     })()
@@ -68,12 +68,12 @@ class _MainScreenState extends State<MainScreen> {
             title:Text('Wishlist'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.local_offer),
-            title:Text('Offers'),
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             title:Text('Cart'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            title:Text('Transaction'),
           ),
         ],
       ),

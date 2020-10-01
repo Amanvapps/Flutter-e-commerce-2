@@ -14,6 +14,9 @@ class PaymentService
       "token" : TOKEN
     });
 
+
+    print("del cash response ${response.toString()}");
+
     if(response["status"]=="1")
     {
       return true;

@@ -9,6 +9,7 @@ class ApiConstants
   static const String GET_CART = "showCart.php";
   static const String ADD_CART = "saveCart.php";
   static const String DELETE_CART = "delCart.php";
+  static const String UPDATE_CART = "update_cart.php";
   static const String PRODUCTS = "products.php";
   static const String ADD_WISHLIST = "add_wishlist.php";
   static const String GET_WISHLIST = "showWishlist.php";
