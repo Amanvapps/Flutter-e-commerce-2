@@ -32,7 +32,7 @@ class _CartPageState extends State<CartPage> {
   List<CartModel> cartList = [];
   bool isLoading = true;
   bool isDeletingCart = false;
-  double deliveryCharge = 0.0 , taxAmount = 0.0 , cartTotal = 0.0 , totalAmount=0.0 ;
+  double deliveryCharge = 0.0 , cartTotal = 0.0 , totalAmount=0.0 ;
 
 
 
@@ -64,7 +64,6 @@ getCart() async
 
 
     deliveryCharge=0.0;
-    taxAmount = 0.0;
     cartTotal = 0.0;
     totalAmount = 0.0;
 
@@ -90,8 +89,7 @@ getCart() async
       });
 
 
-      taxAmount = (2/100) * cartTotal;
-      totalAmount = cartTotal + taxAmount + deliveryCharge;
+      totalAmount = cartTotal + deliveryCharge;
 
 
 
@@ -263,8 +261,8 @@ getCart() async
                   for(int i=0 ; i<cartList.length ; i++){
                     cartTotal = cartTotal + (quantityItemList[i] * double.parse(cartList[i].prod_price));
                   };
-                  taxAmount = (2/100)*cartTotal;
-                  totalAmount = cartTotal + taxAmount + deliveryCharge;
+
+                  totalAmount = cartTotal + deliveryCharge;
 
 
                   setState(() {
@@ -308,8 +306,8 @@ getCart() async
                       for(int i=0 ; i<cartList.length ; i++){
                         cartTotal = cartTotal + (quantityItemList[i] * double.parse(cartList[i].prod_price));
                       };
-                      taxAmount = (2/100)*cartTotal;
-                      totalAmount = cartTotal + taxAmount + deliveryCharge;
+
+                      totalAmount = cartTotal + deliveryCharge;
 
 
                       setState(() {
@@ -345,8 +343,8 @@ getCart() async
                 for(int i=0 ; i<cartList.length ; i++){
                   cartTotal = cartTotal + (quantityItemList[i] * double.parse(cartList[i].prod_price));
                 };
-                taxAmount = (2/100)*cartTotal;
-                totalAmount = cartTotal + taxAmount + deliveryCharge;
+
+                totalAmount = cartTotal + deliveryCharge;
 
                 setState(() {
                 });
@@ -443,20 +441,14 @@ print(res.toString());
             onTap: () async {
 
 
+
               isDeletingCart = true;
               setState(() {
               });
 
               //save all objects to cart(update cart api....)
+              payOnline();
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => UpdatedCartScreen("online")),
-              );
-
-              isDeletingCart = false;
-              setState(() {
-              });
 
 
 
@@ -541,8 +533,7 @@ print(res.toString());
 
        if(res == true)
          {
-//          deleteCash(userId );
-
+          deleteCash(userId );
          }
        else
          {
@@ -561,9 +552,29 @@ print(res.toString());
 
    deleteCash(String userId) async
    {
+
      bool response = await PaymentService.deleteCash(userId);
      if(response == true)
      {
+
+       //for getting cart and refresh quantity list
+       cartList = await CartService.getCartList(userId);
+
+       if(cartList != null)
+       {
+
+         for(CartModel item in cartList)
+         {
+           quantityItemList.add(int.parse(item.quantity));
+         }
+
+       }
+
+       isDeletingCart = false;
+       setState(() {
+       });
+
+
        Fluttertoast.showToast(msg: "Cart updated!" , textColor: Colors.white , backgroundColor: Colors.black);
        Navigator.push(
          context,
@@ -578,5 +589,79 @@ print(res.toString());
          Fluttertoast.showToast(msg: "Error occurred !" , textColor: Colors.white , backgroundColor: Colors.black);
        }
    }
+
+   payOnline() async {
+
+       SharedPreferences prefs = await SharedPreferences.getInstance();
+       String userId = prefs.getString('userId');
+       if(!EmptyValidation.isEmpty(userId))
+       {
+         Fluttertoast.showToast(msg: "Loading for payment..." , textColor: Colors.white , backgroundColor: Colors.black);
+
+         List updatedCartList = [];
+
+         for(int i=0 ; i<cartList.length ; i++) {
+
+
+
+           var product = {
+             "user_id" : userId.toString(),
+             "prod_sr" : cartList[i].prod_id.toString(),
+             "qty" : quantityItemList[i].toString(),
+             "sale_price" : cartList[i].prod_price.toString(),
+           };
+
+
+
+           updatedCartList.add(product);
+         }
+
+
+         bool res = await CartService.updateCart(userId, json.encode(updatedCartList));
+
+         if(res == true)
+         {
+
+           cartList = await CartService.getCartList(userId);
+
+           if(cartList != null)
+           {
+
+             for(CartModel item in cartList)
+             {
+               quantityItemList.add(int.parse(item.quantity));
+             }
+
+           }
+
+           isDeletingCart = false;
+           setState(() {
+           });
+
+
+
+           await Navigator.push(
+             context,
+             MaterialPageRoute(builder: (context) => UpdatedCartScreen("online")),
+           );
+
+
+
+         }
+         else
+         {
+           isDeletingCart = false;
+           setState(() {
+           });
+           Fluttertoast.showToast(msg: "Error occurred !" , textColor: Colors.white , backgroundColor: Colors.black);
+         }
+
+
+
+       }
+       else
+         AuthService.logout(context);
+     }
+
 
 }

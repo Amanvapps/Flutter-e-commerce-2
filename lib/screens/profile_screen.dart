@@ -219,9 +219,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: const EdgeInsets.symmetric(vertical : 5.0),
                 child: Row(
                   children: <Widget>[
-                    Icon(Icons.payment, color: Colors.blue,),
+                    Icon(Icons.person, color: Colors.blue,),
                     SizedBox(width: 15.0,),
-                    Text('${userProfile.pincode}' , style: TextStyle(fontSize: 16.0),),
+                    Text('${userProfile.user_name}' , style: TextStyle(fontSize: 16.0),),
                   ],
                 ),
               ),

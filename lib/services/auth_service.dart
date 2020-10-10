@@ -25,7 +25,7 @@ class AuthService
         User user = User(response["data"][0]);
         await saveToken(user);
 //        await setUserId(user);
-        Fluttertoast.showToast(msg: "Login successfull !" , textColor: Colors.white , backgroundColor: Colors.black);
+        Fluttertoast.showToast(msg: "Login successful" , textColor: Colors.white , backgroundColor: Colors.black);
         return true;
       }
     Fluttertoast.showToast(msg: "Invalid Credentials !" , textColor: Colors.white , backgroundColor: Colors.black);
@@ -36,6 +36,10 @@ class AuthService
   static Future saveToken(User user) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('userId', user.user_id);
+    await prefs.setString('webhook', user.webhook);
+    await prefs.setString('pageDirected', user.pageDirected);
+    await prefs.setString('apiKey', user.apiKey);
+    await prefs.setString('apiToken', user.apiToken);
     await prefs.setString('userProfile', user.profile_image);
     await prefs.setInt('userProfile', user.wishlist_items);
     await prefs.setInt('userCart', user.cart_items);

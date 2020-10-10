@@ -32,12 +32,7 @@ class DrawerElements {
             ),
           ),
           decoration: BoxDecoration(
-//              color: Colors.blueAccent,
-              gradient: LinearGradient(
-                  begin: Alignment(0.4, 0.5),
-                  end: Alignment(0, 0.7),
-                  colors: [Colors.blue, Colors.blueAccent])
-
+              color: Colors.blueAccent,
           ),
         ),
         ...Routes.getUserRoutes(context, pageName , mainCtx),                 //assigned collection of navigation elements

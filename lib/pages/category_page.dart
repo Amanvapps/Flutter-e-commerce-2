@@ -106,7 +106,7 @@ class _MainScreenState extends State<CategoryPage> {
       onTap: (){
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SubCategoryScreen(category , widget.mainCtx)),
+          MaterialPageRoute(builder: (context) => SubCategoryScreen(category , widget.mainCtx , widget.username)),
         );
       },
       child: Container(

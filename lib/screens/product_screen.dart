@@ -1,6 +1,7 @@
 import 'package:ecommerceapp/models/main_category_model.dart';
 import 'package:ecommerceapp/models/product_model.dart';
 import 'package:ecommerceapp/models/sub_categories_model.dart';
+import 'package:ecommerceapp/screens/buy_screen.dart';
 import 'package:ecommerceapp/services/cart_service.dart';
 import 'package:ecommerceapp/services/product_service.dart';
 import 'package:ecommerceapp/services/wishlist_service.dart';
@@ -14,11 +15,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductScreen extends StatefulWidget {
 
-  var mainCtx;
+  var mainCtx , username;
   MainCategories categories;
   SubCategoriesModel subCategories;
 
-  ProductScreen(this.subCategories , this.categories , this.mainCtx);
+  ProductScreen(this.subCategories , this.categories , this.mainCtx , this.username);
 
   @override
   _ProductScreenState createState() => _ProductScreenState();
@@ -238,17 +239,25 @@ class _ProductScreenState extends State<ProductScreen> {
             SizedBox(height: 10,),
             quantityButtons(productItem, index),
             SizedBox(height: 20,),
-            Container(
-              height: 40,
-              margin: const EdgeInsets.only(left: 10 , right: 10),
-              padding: const EdgeInsets.all(5),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(7),
+            GestureDetector(
+              onTap: (){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => BuyScreen(widget.mainCtx , productItem , quantityItemList[index] , widget.username)),
+                );
+              },
+              child: Container(
+                height: 40,
+                margin: const EdgeInsets.only(left: 10 , right: 10),
+                padding: const EdgeInsets.all(5),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(7),
 //                  border: Border.all(color: Colors.w),
-                  color: Colors.red
+                    color: Colors.red
+                ),
+                child: FittedBox(child: Text('Buy' , style: TextStyle(fontSize : 18 , color: Colors.white),)),
               ),
-              child: FittedBox(child: Text('Buy' , style: TextStyle(fontSize : 18 , color: Colors.white),)),
             )
           ],
         ),

@@ -17,6 +17,9 @@ class ApiConstants
   static const String USER_PROFILE = "user_profile.php";
   static const String DELETE_CASH = "delCash.php";
   static const String CHECKOUT = "checkout.php";
-
+  static const String APPLY_COUPONS = "apply_coupons.php";
+  static const String CASH_PAYMENT = "cod.php";
+  static const String PAYMENT = "pay.php";
+  static const String PAYMENT_HISTORY = "paymentHistory.php";
 
 }

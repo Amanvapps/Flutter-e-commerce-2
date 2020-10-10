@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 
 class SubCategoryScreen extends StatefulWidget {
 
-  var mainCtx;
+  var mainCtx , username;
   MainCategories categories;
 
-  SubCategoryScreen(this.categories , this.mainCtx);
+  SubCategoryScreen(this.categories , this.mainCtx , this.username);
 
   @override
   _SubCategoryScreenState createState() => _SubCategoryScreenState();
@@ -97,7 +97,7 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
       onTap: (){
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProductScreen(category , widget.categories , widget.mainCtx)),
+          MaterialPageRoute(builder: (context) => ProductScreen(category , widget.categories , widget.mainCtx , widget.username)),
         );
       },
       child: Container(

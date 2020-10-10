@@ -1,6 +1,9 @@
 import 'package:ecommerceapp/models/cart_model.dart';
+import 'package:ecommerceapp/screens/online_payment_webview.dart';
+import 'package:ecommerceapp/screens/order_successful_screen.dart';
 import 'package:ecommerceapp/services/auth_service.dart';
 import 'package:ecommerceapp/services/cart_service.dart';
+import 'package:ecommerceapp/services/payment_service.dart';
 import 'package:ecommerceapp/utils/empty_validation.dart';
 import 'package:ecommerceapp/widgets/loader.dart';
 import 'package:flutter/material.dart';
@@ -22,50 +25,76 @@ class UpdatedCartScreen extends StatefulWidget {
 class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
 
 
-  Razorpay _razorpay = Razorpay();
+//  Razorpay _razorpay = Razorpay();
 
   List<CartModel> cartList = [];
   bool isLoading = true;
   bool isDeletingCart = false;
-  double deliveryCharge = 0.0 , taxAmount = 0.0 , cartTotal = 0.0 , totalAmount=0.0 ;
+  double deliveryCharge = 0.0 , cartTotal = 0.0 , totalAmount=0.0 , couponDiscount=0.0 ;
+
+  var name , address , email , phone;
+  bool isCouponApplied = false;
+
+  TextEditingController couponController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
 
 
 
-  void checkout()
-  {
-    var options = {
-      'key': 'rzp_live_zo0oXKAv5gykEf',
-      'amount': 11 * 100,
-      'name': 'My delivery',
-      'description': 'Products',
-//      'prefill': {
-//        'contact': '918171508475',
-//        'email': 'amanapp19@gmail.com'
-//      },
-      "external" : {
-        "wallets" :  ["paytm" , "phonepe"]
-      }
-    };
 
+//
+//  void checkout()
+//  {
+//    var options = {
+//      'key': 'rzp_live_zo0oXKAv5gykEf',
+//      'amount': 11 * 100,
+//      'name': 'My delivery',
+//      'description': 'Products',
+////      'prefill': {
+////        'contact': '918171508475',
+////        'email': 'amanapp19@gmail.com'
+////      },
+//      "external" : {
+//        "wallets" :  ["paytm" , "phonepe"]
+//      }
+//    };
+//
+//
+//    try{
+//      _razorpay.open(options);
+//    } catch(e)
+//    {}
+//
 
-    try{
-      _razorpay.open(options);
-    } catch(e)
-    {}
-
-
-
-  }
+//
+//  }
 
 
   @override
   void initState() => {
     (() async {
+//
+//
+//      _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+//      _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+//      _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
 
+      SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-      _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-      _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+      name = prefs.getString('userName');
+
+      email = prefs.getString('userEmailId');
+
+      address = prefs.getString('userAddress');
+
+      phone = prefs.getString('userMobile');
+
+      nameController.text = name;
+      emailController.text = email;
+      addressController.text = address;
+      phoneController.text = phone;
 
       await getCart();
 
@@ -80,12 +109,12 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
 
   };
 
-
-  @override
-  void dispose() {
-    super.dispose();
-    _razorpay.clear();
-  }
+//
+//  @override
+//  void dispose() {
+//    super.dispose();
+//    _razorpay.clear();
+//  }
 
 
   getCart() async
@@ -97,7 +126,7 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
 
 
       deliveryCharge=0.0;
-      taxAmount = 0.0;
+//      taxAmount = 0.0;
       cartTotal = 0.0;
       totalAmount = 0.0;
 
@@ -117,8 +146,8 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
         });
 
 
-        taxAmount = (2/100) * cartTotal;
-        totalAmount = cartTotal + taxAmount + deliveryCharge;
+//        taxAmount = (2/100) * cartTotal;
+        totalAmount = cartTotal + deliveryCharge;
 
 
 
@@ -136,20 +165,47 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
 
   }
 
+//
+//  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+//    print("done");
+//    Fluttertoast.showToast(msg: "Payment Successfull" , backgroundColor: Colors.black , textColor: Colors.white);
+//  }
+//
+//  void _handlePaymentError(PaymentFailureResponse response) {
+//    Fluttertoast.showToast(msg: "Payment error :" + response.message , backgroundColor: Colors.black , textColor: Colors.white);
+//  }
+//
+//  void _handleExternalWallet(ExternalWalletResponse response) {
+//  }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    print("done");
-    Fluttertoast.showToast(msg: "Payment Successfull" , backgroundColor: Colors.black , textColor: Colors.white);
+
+  getCoupon(userId , couponCode) async
+  {
+    Fluttertoast.showToast(msg: "Applying coupon...");
+    
+    isDeletingCart = true;
+    setState(() {
+    });
+    
+    var res = await PaymentService.getCoupon(userId, couponCode);
+
+    if(res!=null)
+      {
+
+        couponDiscount =  double.parse(res);
+        totalAmount = totalAmount - couponDiscount;
+      }
+    else
+      {
+        isCouponApplied = false;
+        Fluttertoast.showToast(msg: "Invalid Coupon!");
+      }
+
+    
+    isDeletingCart = false;
+    setState(() {
+    });
   }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    Fluttertoast.showToast(msg: "Payment error :" + response.message , backgroundColor: Colors.black , textColor: Colors.white);
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +239,36 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
                     return itemCard(cartList[index] , index);
                   }
               ),
+              SizedBox(height: 10,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                      margin: const EdgeInsets.only(left: 20),
+                      child: Text('Contact Info' , style: TextStyle(fontSize: 20 , fontWeight: FontWeight.bold),)),
+                  GestureDetector(
+                    onTap: () async {
+                     await profileDialog();
+                      setState(() {
+                      });
+
+                    },
+                    child: Container(
+                        margin: const EdgeInsets.only(right: 50),
+                        child: Icon(Icons.edit)),
+                  )
+                ],
+              ),
+              _buildInfoContainer(),
+              SizedBox(height: 10,),
+              Container(
+                  margin: const EdgeInsets.only(left: 20),
+                  child: Text('Discounts' , style: TextStyle(fontSize: 20 , fontWeight: FontWeight.bold),)),
+              _buildDiscountContainer(),
+              SizedBox(height: 20,),
+              Container(
+                  margin: const EdgeInsets.only(left: 20),
+                  child: Text('Order Summary' , style: TextStyle(fontSize: 20 , fontWeight: FontWeight.bold),)),
               _buildTotalContainer()
             ],
           ),
@@ -205,7 +291,7 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
   Widget itemCard(CartModel cartItem , int index)
   {
     return Container(
-      margin: const EdgeInsets.all(15),
+      margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
@@ -262,9 +348,8 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
   Widget _buildTotalContainer()
   {
     return Container(
-      height: 240.0,
       padding: EdgeInsets.symmetric(horizontal: 20.0),
-      margin: EdgeInsets.only(left : 20.0 , right: 20 , top: 50),
+      margin: EdgeInsets.only(left : 20.0 , right: 20 , top: 30 , bottom: 20),
       child: Column(
         children: <Widget>[
           Row(
@@ -274,20 +359,28 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
               Text(cartTotal.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
             ],
           ),
-          SizedBox(height: 10.0,),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text('Transaction Tax' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
-              Text(taxAmount.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
-            ],
-          ),
+//          SizedBox(height: 10.0,),
+//          Row(
+//            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//            children: <Widget>[
+//              Text('Transaction Tax' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
+//              Text(taxAmount.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
+//            ],
+//          ),
           SizedBox(height: 10.0,),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text('Delivery Charge' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
               Text( deliveryCharge.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
+            ],
+          ),
+          SizedBox(height: 10.0,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text('Coupon Discount' , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.grey),),
+              Text( couponDiscount.toString() , style: TextStyle(fontSize: 16.0 , fontWeight: FontWeight.bold , color: Colors.black),),
             ],
           ),
           Divider(height: 40.0 , color: Color(0xFFD3D3D3),),
@@ -302,7 +395,20 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
           GestureDetector(
             onTap: (){
               if(widget.paymentMode == "online")
-              checkout();
+              {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => PaymentWebview(isCouponApplied , couponController.text , totalAmount.toString() , name , phone , email , deliveryCharge ,  address)),
+                );
+              }
+              else
+                {
+                  //call cod api and move to thanks screen.....
+
+
+                  payCod();
+
+                }
             },
             child: Container(
               width: MediaQuery.of(context).size.width,
@@ -327,5 +433,250 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
     );
   }
 
+  _buildDiscountContainer()
+  {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.0),
+      margin: EdgeInsets.only(left : 0.0 , right: 20 , top: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(3),
+              child: TextField(
+                controller: couponController,
+                decoration: InputDecoration(
+                    hintText: "Coupon code",
+                    border: InputBorder.none
+                ),
+              ),
+              margin: const EdgeInsets.all(10),
+              height: 50,
+              decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(6)
+              ),
+            ),
+          ),
+          Container(
+            height: 40,
+            width: 100,
+            margin: const EdgeInsets.only(left: 10 , right: 10),
+            padding: const EdgeInsets.all(5),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                color: Colors.red
+            ),
+            child: Column(
+              children: [
+                (!isCouponApplied) ? GestureDetector(
+                    onTap: () async {
+                      if(couponController.text!="")
+                        {
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        String userId = prefs.getString('userId');
+                        if(!EmptyValidation.isEmpty(userId))
+                        {
+                          isCouponApplied = true;
+                          getCoupon(userId, couponController.text);
+                        }
+                        else
+                          {
+                            isCouponApplied = false;
+
+                            Fluttertoast.showToast(msg: "Session expired!" , backgroundColor: Colors.black , textColor: Colors.white);
+                            AuthService.logout(context);
+                          }
+
+                        }
+
+
+                    },
+                    child: FittedBox(child: Text('Apply' , style: TextStyle(fontSize : 18 , color: Colors.white),))) : Container(),
+
+                (isCouponApplied) ? GestureDetector(
+                    onTap: () async {
+                      isCouponApplied = false;
+                      totalAmount = totalAmount + couponDiscount;
+                      couponDiscount = 0;
+                      couponController.text = "";
+
+                      setState(() {
+                      });
+                    },
+                    child: FittedBox(child: Text('Remove' , style: TextStyle(fontSize : 18 , color: Colors.white),))) : Container(),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  _buildInfoContainer()
+  {
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('Name : ' , style: TextStyle(fontSize : 16)),
+              Text(name , style: TextStyle(fontSize : 17 , color: Colors.grey),)
+            ],
+          ),
+          SizedBox(height :10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text('Email : ' , style: TextStyle(fontSize : 16)),
+              Text(email , style: TextStyle(fontSize : 17 , color: Colors.grey),)
+            ],
+          )
+        ],
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 20.0),
+      margin: EdgeInsets.only(left : 10.0 , right: 20 , top: 10),
+    );
+  }
+
+  profileDialog() async
+  {
+
+
+
+    return await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('Set Details'),
+            content: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return  Container(
+                  height: MediaQuery.of(context).size.height/2.5,
+                  width: 500,
+                  child: ListView(
+                    shrinkWrap: true,
+//                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Name' , style: TextStyle(fontSize: 15 , fontWeight: FontWeight.bold),),
+                      SizedBox(height: 10,),
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                            hintText: 'Name',
+                            border: new OutlineInputBorder()
+                        ),
+                      ),
+                      SizedBox(height: 20,),
+                      Text('Email' , style: TextStyle(fontSize: 15 , fontWeight: FontWeight.bold),),
+                      SizedBox(height: 10,),
+                      TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                            hintText: 'Email',
+                            border: new OutlineInputBorder()
+                        ),
+                      ),
+                      SizedBox(height: 20,),
+                      Text('Address' , style: TextStyle(fontSize: 15 , fontWeight: FontWeight.bold),),
+                      SizedBox(height: 10,),
+                      TextField(
+                        controller: addressController,
+                        decoration: InputDecoration(
+                            hintText: 'Address',
+                            border: new OutlineInputBorder()
+                        ),
+                      ),
+                      SizedBox(height: 20,),
+                      Text('Mobile' , style: TextStyle(fontSize: 15 , fontWeight: FontWeight.bold),),
+                      SizedBox(height: 10,),
+                      TextField(
+                        controller: phoneController,
+                        decoration: InputDecoration(
+                            hintText: 'Ph no.',
+                            border: new OutlineInputBorder()
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            actions: <Widget>[
+              new FlatButton(
+                  child: new Text('Cancel'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  }
+              ),
+              new FlatButton(
+                  child: new Text('Done'),
+                  onPressed: () {
+
+                    if(phoneController.text != "" && emailController.text != "" && nameController.text !="" && addressController.text!="")
+                    {
+                      name = nameController.text;
+                      email = emailController.text;
+                      address = addressController.text;
+                      phone = phoneController.text;
+
+                      Navigator.pop(context , "done");
+                    }
+                    else
+                      {
+                        Fluttertoast.showToast(msg: "Empty Fields!");
+                      }
+                   
+                  }
+              )
+            ],
+          );
+        });
+  }
+
+   payCod() async
+   {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+     String userId = prefs.getString('userId');
+     if(!EmptyValidation.isEmpty(userId))
+     {
+
+       isDeletingCart = true;
+       setState(() {
+       });
+
+       var res;
+
+       if(isCouponApplied == true)
+         res = await PaymentService.setPayment(userId , nameController.text , phoneController.text , emailController.text , "XYZ COD" , addressController.text ,  deliveryCharge.toString() , 1 , couponController.text);
+       else
+         res = await PaymentService.setPayment(userId , nameController.text , phoneController.text , emailController.text , "XYZ COD" , addressController.text ,  deliveryCharge.toString() , 0 , " ");
+
+
+       if(res == true)
+         {
+           Fluttertoast.showToast(msg: "Payment Successful" , backgroundColor: Colors.black , textColor: Colors.white);
+           Navigator.pushReplacement(
+             context,
+             MaterialPageRoute(builder: (context) => OrderSuccessfulScreen()),
+           );
+         }
+       else
+         Fluttertoast.showToast(msg: "Payment Failed!" , backgroundColor: Colors.black , textColor: Colors.white);
+
+       isDeletingCart = false;
+       setState(() {
+       });
+
+     }
+     else
+       {
+         AuthService.logout(context);
+       }
+   }
 
 }

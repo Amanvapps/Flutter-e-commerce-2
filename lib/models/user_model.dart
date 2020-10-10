@@ -13,10 +13,19 @@ class User
   String landmark;
   int cart_items;
   int wishlist_items;
+  String webhook;
+  String pageDirected;
+  String apiKey;
+  String apiToken;
 
 
   User(obj)
   {
+    this.webhook = obj["webhook"];
+    this.pageDirected = obj["page_redirect"];
+    this.apiKey = obj["api_key"];
+    this.apiToken = obj["api_token"];
+
     this.user_id = obj["user_sr"];
     this.user_name = obj["user_name"];
     this.mobile = obj["mobile"];
