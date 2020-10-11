@@ -17,7 +17,6 @@ class Routes {
       },
     );
 
-
     return [
       settingsTab
     ];

@@ -4,7 +4,6 @@ import 'package:ecommerceapp/screens/product_screen.dart';
 import 'package:ecommerceapp/services/category_service.dart';
 import 'package:ecommerceapp/utils/empty_validation.dart';
 import 'package:ecommerceapp/widgets/loader.dart';
-import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
 import 'package:flutter/material.dart';
 
 class SubCategoryScreen extends StatefulWidget {
@@ -35,8 +34,6 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
   getSubCategories(categoryName) async
   {
     categoryList = await CategoryService.getSubCategoryList(categoryName);
-
-    print(categoryList.toString());
     isLoading = false;
     setState(() {
     });
@@ -45,12 +42,8 @@ class _SubCategoryScreenState extends State<SubCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
 
     return Scaffold(
-//      drawer: Drawer(
-//        child: DrawerElements.getDrawer("sub_category_screen", context, widget.mainCtx),
-//      ),
       appBar: AppBar(
           iconTheme: new IconThemeData(color: Colors.black),
           elevation: 2,

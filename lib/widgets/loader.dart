@@ -26,7 +26,6 @@ class Loader {
         child: SpinKitPouringHourglass(
           color: Colors.blueAccent,
           size: 40.0,
-          // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
         ),
       ),
     );

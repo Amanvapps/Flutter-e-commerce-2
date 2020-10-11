@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:ecommerceapp/models/cart_model.dart';
-import 'package:ecommerceapp/models/product_model.dart';
 import 'package:ecommerceapp/screens/updated_cart_screen.dart';
 import 'package:ecommerceapp/services/payment_service.dart';
 import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:ecommerceapp/services/auth_service.dart';
 import 'package:ecommerceapp/services/cart_service.dart';
 import 'package:ecommerceapp/utils/empty_validation.dart';
@@ -143,7 +141,6 @@ getCart() async
                 return itemCard(cartList[index] , index);
               }
               ),
-//              _buildTotalContainer()
             _selectPaymentType()
             ],
           ),
@@ -393,7 +390,6 @@ getCart() async
     String userId = prefs.getString('userId');
 
     bool res = await CartService.deleteCart(userId, cartItem.prod_id);
-print(res.toString());
     return res;
   }
 
@@ -524,9 +520,6 @@ print(res.toString());
 
          updatedCartList.add(product);
        }
-
-//
-//       print("--list--${updatedCartList.toString()}");
 
 
        bool res = await CartService.updateCart(userId, json.encode(updatedCartList));

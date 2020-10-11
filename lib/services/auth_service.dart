@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:ecommerceapp/screens/login_screen.dart';
 import 'package:ecommerceapp/utils/ApiConstants.dart';
 import 'package:ecommerceapp/utils/requestHandler.dart';
@@ -24,7 +22,6 @@ class AuthService
       {
         User user = User(response["data"][0]);
         await saveToken(user);
-//        await setUserId(user);
         Fluttertoast.showToast(msg: "Login successful" , textColor: Colors.white , backgroundColor: Colors.black);
         return true;
       }
@@ -65,19 +62,6 @@ class AuthService
     return true;
   }
 
-//  static Future setUserId(User user) async
-//   {
-//     SharedPreferences prefs = await SharedPreferences.getInstance();
-//     await prefs.setString('userId', user.user_id);
-//  }
-//
-//  static Future getUserId() async
-//  {
-//    SharedPreferences prefs = await SharedPreferences.getInstance();
-//    String userId = prefs.getString('userId');
-//    return userId;
-//  }
-
 
   static Future register(String username , String name , String city , String phone, String password , String state , String address , String pincode , String landmark) async {
 
@@ -104,6 +88,11 @@ class AuthService
     Fluttertoast.showToast(msg: "Logout Sucessfully");
     return Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
 
+  }
+
+  static resetPassword(String email, String password)
+  {
+    return true;
   }
 
 

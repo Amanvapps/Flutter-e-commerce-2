@@ -1,8 +1,11 @@
+import 'dart:math';
+
 import 'package:ecommerceapp/models/payment_model.dart';
 import 'package:ecommerceapp/services/auth_service.dart';
 import 'package:ecommerceapp/services/payment_service.dart';
 import 'package:ecommerceapp/utils/empty_validation.dart';
 import 'package:ecommerceapp/widgets/loader.dart';
+import 'package:intl/intl.dart';
 import 'package:ecommerceapp/widgets/navigation_drawer_elements.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -101,9 +104,12 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
 
   Widget HistoryListCard( PaymentModel historyList)
   {
+    var date = DateFormat('dd,MMM yyyy').format(DateTime.parse(historyList.date));
+
+
     return Container(
       padding: EdgeInsets.only(top: 26 , bottom: 26 , left: 6),
-      margin: const EdgeInsets.all(15),
+      margin: const EdgeInsets.only(left: 15 , right: 15 , top: 20 , bottom: 5),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -114,7 +120,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
              height: 70,
              width: 70,
              decoration: BoxDecoration(
-               color: Colors.redAccent,
+               color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
                shape: BoxShape.circle
              ),
              child: Text("${(historyList.prod_name != null) ? historyList.prod_name.toString().substring(0 , 1) : "A"}" , style: TextStyle(fontSize: 30 , fontWeight: FontWeight.normal , color: Colors.white),),
@@ -126,7 +132,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
             children: [
               Container(
                   margin: EdgeInsets.only(top: 10),
-                  child: Expanded(child: Text('${(historyList.prod_name != null) ? historyList.prod_name.toString() : ""}' , overflow: TextOverflow.ellipsis , style: TextStyle(fontSize: 20),))),
+                  child: Text('${(historyList.prod_name != null) ? historyList.prod_name.toString() : ""}' , overflow: TextOverflow.ellipsis , style: TextStyle(fontSize: 20),)),
               SizedBox(height: 10,),
               Row(
                 children: [
@@ -142,12 +148,13 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
           ),
           SizedBox(width: 20,),
           Expanded(
-              child: Column(
-                children: [
-                  Text('\u{20B9} ${historyList.prod_price}' ,  style: TextStyle(fontSize: 20 , color: Colors.green),),
-                  Text('${historyList.date}')
-                ],
-              )
+            child: Column(
+              children: [
+                Text('\u{20B9} ${historyList.prod_price}' ,  style: TextStyle(fontSize: 20 , color: Colors.red),),
+                SizedBox(height: 10,),
+                Text('${date}')
+              ],
+            ),
           )
         ],
       ),

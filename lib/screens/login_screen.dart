@@ -1,3 +1,4 @@
+import 'package:ecommerceapp/screens/forgot_password_screen.dart';
 import 'package:ecommerceapp/screens/main_screen.dart';
 import 'package:ecommerceapp/screens/sign_up_screen.dart';
 import 'package:ecommerceapp/services/auth_service.dart';
@@ -129,7 +130,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                                 SizedBox(height: 20,),
-                                Text(' Forgot Password' , style: TextStyle(color: Colors.blue ,fontSize: 18),)
+                                GestureDetector(
+                                    onTap: (){
+                                      Navigator.pushReplacement(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => ForgotPassword()),
+                                      );
+                                    },
+                                    child: Text(' Forgot Password' , style: TextStyle(color: Colors.blue ,fontSize: 18),))
                               ],
                             ),
                           )

@@ -192,8 +192,6 @@ class _WishlistPageState extends State<WishlistPage> {
   deleteWishlistItem(ProductModel productItem)
   async {
 
-    print(productItem.prod_id);
-
     isLoading = true;
     setState(() {
     });

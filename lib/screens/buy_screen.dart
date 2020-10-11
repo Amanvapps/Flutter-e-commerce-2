@@ -274,7 +274,6 @@ class _BuyScreenState extends State<BuyScreen> {
           Expanded(
             child: GestureDetector(
               onTap: (){
-                print(widget.productItem.cod_mode);
 
                 if(int.parse(widget.productItem.cod_mode) == 1 )
                   {

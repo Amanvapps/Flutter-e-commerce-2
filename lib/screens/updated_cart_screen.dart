@@ -9,7 +9,6 @@ import 'package:ecommerceapp/widgets/loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UpdatedCartScreen extends StatefulWidget {
@@ -24,8 +23,6 @@ class UpdatedCartScreen extends StatefulWidget {
 
 class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
 
-
-//  Razorpay _razorpay = Razorpay();
 
   List<CartModel> cartList = [];
   bool isLoading = true;
@@ -44,42 +41,10 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
 
 
 
-//
-//  void checkout()
-//  {
-//    var options = {
-//      'key': 'rzp_live_zo0oXKAv5gykEf',
-//      'amount': 11 * 100,
-//      'name': 'My delivery',
-//      'description': 'Products',
-////      'prefill': {
-////        'contact': '918171508475',
-////        'email': 'amanapp19@gmail.com'
-////      },
-//      "external" : {
-//        "wallets" :  ["paytm" , "phonepe"]
-//      }
-//    };
-//
-//
-//    try{
-//      _razorpay.open(options);
-//    } catch(e)
-//    {}
-//
-
-//
-//  }
-
-
   @override
   void initState() => {
     (() async {
-//
-//
-//      _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-//      _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-//      _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -108,13 +73,6 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
     })()
 
   };
-
-//
-//  @override
-//  void dispose() {
-//    super.dispose();
-//    _razorpay.clear();
-//  }
 
 
   getCart() async
@@ -145,8 +103,6 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
           cartTotal = cartTotal + (int.parse(element.quantity) * int.parse(element.prod_price));
         });
 
-
-//        taxAmount = (2/100) * cartTotal;
         totalAmount = cartTotal + deliveryCharge;
 
 
@@ -165,18 +121,6 @@ class _UpdatedCartScreenState extends State<UpdatedCartScreen> {
 
   }
 
-//
-//  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-//    print("done");
-//    Fluttertoast.showToast(msg: "Payment Successfull" , backgroundColor: Colors.black , textColor: Colors.white);
-//  }
-//
-//  void _handlePaymentError(PaymentFailureResponse response) {
-//    Fluttertoast.showToast(msg: "Payment error :" + response.message , backgroundColor: Colors.black , textColor: Colors.white);
-//  }
-//
-//  void _handleExternalWallet(ExternalWalletResponse response) {
-//  }
 
 
   getCoupon(userId , couponCode) async

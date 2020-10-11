@@ -16,8 +16,6 @@ class WishlistService
       "token" : TOKEN
     });
 
-    print(response.toString());
-
     if(response["status"]=="1")
     {
       return true;

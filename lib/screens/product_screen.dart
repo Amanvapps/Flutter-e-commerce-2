@@ -203,9 +203,6 @@ class _ProductScreenState extends State<ProductScreen> {
                     setState(() {
                     });
                     addToWishlist(productItem.prod_id , productItem.sale_price ,quantityItemList[index].toString());
-                  print("no contain");
-
-
                   }
 
 

@@ -68,8 +68,6 @@ class CartService
       "token" : TOKEN
     });
 
-    print('update cart response----${response.toString()}');
-
     if(response["status"]=="1")
     {
       return true;

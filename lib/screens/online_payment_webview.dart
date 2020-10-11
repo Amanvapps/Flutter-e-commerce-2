@@ -83,7 +83,7 @@ class _PaymentWebviewState extends State<PaymentWebview> {
           "coupon_code" : widget.couponCode,
 
           "product_name" : "aman.e.ecommerceapp",
-          "product_price" : "10",
+          "product_price" : widget.productPrice,
           "name" : widget.name,
           "phone" : widget.phone,
           "email" : widget.email,
@@ -93,8 +93,6 @@ class _PaymentWebviewState extends State<PaymentWebview> {
         };
 
         paymentUrl = ApiConstants.URL + ApiConstants.PAYMENT + "?" + RequestHandler.encodeQuery(params);
-
-        print(paymentUrl);
 
         isLoading = false;
         setState(() {
